@@ -1,5 +1,6 @@
 package com.abin.mallchat.common.user.service;
 
+import com.abin.mallchat.common.chat.domain.dto.LoginDto;
 import com.abin.mallchat.common.user.domain.enums.WSBaseResp;
 import com.abin.mallchat.common.user.domain.vo.request.ws.WSAuthorize;
 import io.netty.channel.Channel;
@@ -9,8 +10,9 @@ public interface WebSocketService {
      * 处理用户登录请求，需要返回一张带code的二维码
      *
      * @param channel
+     * @param loginDto
      */
-    void handleLoginReq(Channel channel);
+    void handleLoginReq(Channel channel, LoginDto loginDto);
 
     /**
      * 处理所有ws连接的事件

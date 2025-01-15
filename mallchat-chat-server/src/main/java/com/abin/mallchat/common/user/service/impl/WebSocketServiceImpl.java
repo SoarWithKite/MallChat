@@ -3,10 +3,14 @@ package com.abin.mallchat.common.user.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
+import com.abin.mallchat.common.chat.domain.dto.LoginDto;
 import com.abin.mallchat.common.common.config.ThreadPoolConfig;
+import com.abin.mallchat.common.common.constant.MQConstant;
 import com.abin.mallchat.common.common.constant.RedisKey;
+import com.abin.mallchat.common.common.domain.dto.LoginMessageDTO;
 import com.abin.mallchat.common.common.event.UserOfflineEvent;
 import com.abin.mallchat.common.common.event.UserOnlineEvent;
+import com.abin.mallchat.common.common.utils.JwtUtils;
 import com.abin.mallchat.common.common.utils.RedisUtils;
 import com.abin.mallchat.common.user.dao.UserDao;
 import com.abin.mallchat.common.user.domain.dto.WSChannelExtraDTO;
@@ -27,8 +31,6 @@ import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.bean.result.WxMpQrCodeTicket;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
@@ -79,8 +81,6 @@ public class WebSocketServiceImpl implements WebSocketService {
      */
     private static final String LOGIN_CODE = "loginCode";
     @Autowired
-    private WxMpService wxMpService;
-    @Autowired
     private LoginService loginService;
     @Autowired
     private UserDao userDao;
@@ -100,16 +100,17 @@ public class WebSocketServiceImpl implements WebSocketService {
      * 处理用户登录请求，需要返回一张带code的二维码
      *
      * @param channel
+     * @param loginDto
      */
     @SneakyThrows
     @Override
-    public void handleLoginReq(Channel channel) {
+    public void handleLoginReq(Channel channel, LoginDto loginDto) {
         //生成随机不重复的登录码,并将channel存在本地cache中
         Integer code = generateLoginCode(channel);
-        //请求微信接口，获取登录码地址
-        WxMpQrCodeTicket wxMpQrCodeTicket = wxMpService.getQrcodeService().qrCodeCreateTmpTicket(code, (int) EXPIRE_TIME.getSeconds());
-        //返回给前端（channel必在本地）
-        sendMsg(channel, WSAdapter.buildLoginResp(wxMpQrCodeTicket));
+        User user = userDao.getByLoginNameAndPassword(loginDto.getLoginName(), loginDto.getPassword());
+        String token = loginService.generateTokenByUid(user.getId());
+        this.loginSuccess(channel, user, token);
+
     }
 
     /**
@@ -145,7 +146,8 @@ public class WebSocketServiceImpl implements WebSocketService {
         Optional<Long> uidOptional = Optional.ofNullable(wsChannelExtraDTO)
                 .map(WSChannelExtraDTO::getUid);
         boolean offlineAll = offline(channel, uidOptional);
-        if (uidOptional.isPresent() && offlineAll) {//已登录用户断连,并且全下线成功
+        //已登录用户断连,并且全下线成功
+        if (uidOptional.isPresent() && offlineAll) {
             User user = new User();
             user.setId(uidOptional.get());
             user.setLastOptTime(new Date());
@@ -157,7 +159,8 @@ public class WebSocketServiceImpl implements WebSocketService {
     public void authorize(Channel channel, WSAuthorize wsAuthorize) {
         //校验token
         boolean verifySuccess = loginService.verify(wsAuthorize.getToken());
-        if (verifySuccess) {//用户校验成功给用户登录
+        //用户校验成功给用户登录
+        if (verifySuccess) {
             User user = userDao.getById(loginService.getValidUid(wsAuthorize.getToken()));
             loginSuccess(channel, user, wsAuthorize.getToken());
         } else { //让前端的token失效
@@ -221,7 +224,7 @@ public class WebSocketServiceImpl implements WebSocketService {
         //移除code
         WAIT_LOGIN_MAP.invalidate(loginCode);
         //调用用户登录模块
-        String token = loginService.login(uid);
+        String token = loginService.generateTokenByUid(uid);
         //用户登录
         loginSuccess(channel, user, token);
         return Boolean.TRUE;

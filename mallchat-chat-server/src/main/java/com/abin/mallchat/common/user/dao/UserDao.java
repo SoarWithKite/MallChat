@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,8 +28,10 @@ import java.util.List;
 @Service
 public class UserDao extends ServiceImpl<UserMapper, User> {
 
-    public User getByOpenId(String openId) {
-        LambdaQueryWrapper<User> wrapper = new QueryWrapper<User>().lambda().eq(User::getOpenId, openId);
+    public User getByLoginNameAndPassword(String loginName, String password) {
+        LambdaQueryWrapper<User> wrapper = new QueryWrapper<User>().lambda()
+                .eq(StringUtils.isNotBlank(loginName), User::getLoginName, loginName)
+                .eq(StringUtils.isNotBlank(password), User::getPassword, password);
         return getOne(wrapper);
     }
 

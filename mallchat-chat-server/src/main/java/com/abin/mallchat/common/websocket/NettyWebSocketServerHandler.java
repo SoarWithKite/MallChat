@@ -3,10 +3,12 @@ package com.abin.mallchat.common.websocket;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
+import com.abin.mallchat.common.chat.domain.dto.LoginDto;
 import com.abin.mallchat.common.user.domain.enums.WSReqTypeEnum;
 import com.abin.mallchat.common.user.domain.vo.request.ws.WSAuthorize;
 import com.abin.mallchat.common.user.domain.vo.request.ws.WSBaseReq;
 import com.abin.mallchat.common.user.service.WebSocketService;
+import com.alibaba.fastjson2.JSONObject;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -93,11 +95,13 @@ public class NettyWebSocketServerHandler extends SimpleChannelInboundHandler<Tex
     // 读取客户端发送的请求报文
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
-        WSBaseReq wsBaseReq = JSONUtil.toBean(msg.text(), WSBaseReq.class);
+        String text = msg.text();
+        WSBaseReq wsBaseReq = JSONUtil.toBean(text, WSBaseReq.class);
         WSReqTypeEnum wsReqTypeEnum = WSReqTypeEnum.of(wsBaseReq.getType());
         switch (wsReqTypeEnum) {
             case LOGIN:
-                this.webSocketService.handleLoginReq(ctx.channel());
+                LoginDto loginDto = JSONObject.parseObject(wsBaseReq.getData(), LoginDto.class);
+                this.webSocketService.handleLoginReq(ctx.channel(), loginDto);
                 log.info("请求二维码 = " + msg.text());
                 break;
             case HEARTBEAT:

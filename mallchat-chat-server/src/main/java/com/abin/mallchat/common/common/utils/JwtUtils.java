@@ -38,12 +38,11 @@ public class JwtUtils {
      * JWT构成: header, payload, signature
      */
     public String createToken(Long uid) {
-        // build token
-        String token = JWT.create()
-                .withClaim(UID_CLAIM, uid) // 只存一个uid信息，其他的自己去redis查
+        return JWT.create()
+                // 只存一个uid信息，其他的自己去redis查
+                .withClaim(UID_CLAIM, uid)
                 .withClaim(CREATE_TIME, new Date())
-                .sign(Algorithm.HMAC256(secret)); // signature
-        return token;
+                .sign(Algorithm.HMAC256(secret));
     }
 
     /**

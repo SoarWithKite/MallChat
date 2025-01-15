@@ -1,5 +1,7 @@
 package com.abin.mallchat.common.user.service;
 
+import com.abin.mallchat.common.chat.domain.dto.LoginDto;
+
 /**
  * Description: 登录相关处理类
  * Author: <a href="https://github.com/zongzibinbin">abin</a>
@@ -27,9 +29,9 @@ public interface LoginService {
      * 登录成功，获取token
      *
      * @param uid
-     * @return 返回token
+     * @return
      */
-    String login(Long uid);
+    String generateTokenByUid(Long uid);
 
     /**
      * 如果token有效，返回uid

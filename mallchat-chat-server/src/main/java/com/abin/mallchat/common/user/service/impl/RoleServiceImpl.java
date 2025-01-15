@@ -1,10 +1,14 @@
 package com.abin.mallchat.common.user.service.impl;
 
+import com.abin.mallchat.common.common.annotation.RedissonLock;
+import com.abin.mallchat.common.user.dao.RoleDao;
+import com.abin.mallchat.common.user.domain.entity.Role;
 import com.abin.mallchat.common.user.domain.enums.RoleEnum;
 import com.abin.mallchat.common.user.service.IRoleService;
 import com.abin.mallchat.common.user.service.cache.UserCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 import java.util.Set;

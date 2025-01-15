@@ -19,22 +19,22 @@ public class HttpHeadersHandler extends ChannelInboundHandlerAdapter {
             UrlBuilder urlBuilder = UrlBuilder.ofHttp(request.uri());
 
             // 获取token参数
-            String token = Optional.ofNullable(urlBuilder.getQuery()).map(k->k.get("token")).map(CharSequence::toString).orElse("");
+            String token = Optional.ofNullable(urlBuilder.getQuery()).map(k -> k.get("token")).map(CharSequence::toString).orElse("");
             NettyUtil.setAttr(ctx.channel(), NettyUtil.TOKEN, token);
 
             // 获取请求路径
             request.setUri(urlBuilder.getPath().toString());
             HttpHeaders headers = request.headers();
             String ip = headers.get("X-Real-IP");
-            if (StringUtils.isEmpty(ip)) {//如果没经过nginx，就直接获取远端地址
+            //如果没经过nginx，就直接获取远端地址
+            if (StringUtils.isEmpty(ip)) {
                 InetSocketAddress address = (InetSocketAddress) ctx.channel().remoteAddress();
                 ip = address.getAddress().getHostAddress();
             }
             NettyUtil.setAttr(ctx.channel(), NettyUtil.IP, ip);
             ctx.pipeline().remove(this);
             ctx.fireChannelRead(request);
-        }else
-        {
+        } else {
             ctx.fireChannelRead(msg);
         }
     }

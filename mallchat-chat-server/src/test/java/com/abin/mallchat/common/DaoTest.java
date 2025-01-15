@@ -1,22 +1,23 @@
 package com.abin.mallchat.common;
 
+import cn.hutool.core.util.IdUtil;
 import com.abin.mallchat.common.common.domain.enums.IdempotentEnum;
 import com.abin.mallchat.common.common.utils.JwtUtils;
+import com.abin.mallchat.common.user.domain.entity.Role;
 import com.abin.mallchat.common.user.domain.enums.ItemEnum;
+import com.abin.mallchat.common.user.service.IRoleService;
 import com.abin.mallchat.common.user.service.IUserBackpackService;
 import com.abin.mallchat.common.user.service.LoginService;
 import com.abin.mallchat.oss.MinIOTemplate;
 import com.abin.mallchat.oss.domain.OssReq;
 import com.abin.mallchat.oss.domain.OssResp;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.error.WxErrorException;
-import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.bean.result.WxMpQrCodeTicket;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
@@ -34,8 +35,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Slf4j
 public class DaoTest {
     public static final long UID = 12717L;
-    @Autowired
-    private WxMpService wxMpService;
     @Autowired
     private JwtUtils jwtUtils;
 
@@ -62,11 +61,6 @@ public class DaoTest {
         rocketMQTemplate.send("test-topic", build);
     }
 
-    @Test
-    public void jwt() {
-        String login = loginService.login(UID);
-        System.out.println(login);
-    }
 
     @Autowired
     private RedissonClient redissonClient;
@@ -89,6 +83,7 @@ public class DaoTest {
     }
 
     @Autowired
+    @Qualifier("mallchatExecutor")
     private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
     @Test
@@ -100,18 +95,5 @@ public class DaoTest {
             }
         });
         Thread.sleep(200);
-    }
-
-    @Test
-    public void test() throws WxErrorException {
-        WxMpQrCodeTicket wxMpQrCodeTicket = wxMpService.getQrcodeService().qrCodeCreateTmpTicket(1, 10000);
-        String url = wxMpQrCodeTicket.getUrl();
-        System.out.println(url);
-    }
-
-    @Test
-    public void testCreateToken() {
-        String token = loginService.login(10276L);
-        System.out.println("token = " + token);
     }
 }

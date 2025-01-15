@@ -108,4 +108,18 @@ public class User implements Serializable {
         }
         ipInfo.refreshIp(ip);
     }
+
+    /**
+     * 密码
+     */
+    @TableField("password")
+    private String password;
+
+    /**
+     * 登录名
+     */
+    @TableField("login_name")
+    private String loginName;
+
+
 }

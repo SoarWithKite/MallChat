@@ -11,7 +11,6 @@ import com.abin.mallchat.common.user.domain.enums.ChatActiveStatusEnum;
 import com.abin.mallchat.common.user.domain.enums.WSBaseResp;
 import com.abin.mallchat.common.user.domain.enums.WSRespTypeEnum;
 import com.abin.mallchat.common.user.domain.vo.response.ws.*;
-import me.chanjar.weixin.mp.bean.result.WxMpQrCodeTicket;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,13 +26,6 @@ import java.util.Collections;
 public class WSAdapter {
     @Autowired
     private ChatService chatService;
-
-    public static WSBaseResp<WSLoginUrl> buildLoginResp(WxMpQrCodeTicket wxMpQrCodeTicket) {
-        WSBaseResp<WSLoginUrl> wsBaseResp = new WSBaseResp<>();
-        wsBaseResp.setType(WSRespTypeEnum.LOGIN_URL.getType());
-        wsBaseResp.setData(WSLoginUrl.builder().loginUrl(wxMpQrCodeTicket.getUrl()).build());
-        return wsBaseResp;
-    }
 
     public static WSBaseResp<WSLoginSuccess> buildLoginSuccessResp(User user, String token, boolean hasPower) {
         WSBaseResp<WSLoginSuccess> wsBaseResp = new WSBaseResp<>();

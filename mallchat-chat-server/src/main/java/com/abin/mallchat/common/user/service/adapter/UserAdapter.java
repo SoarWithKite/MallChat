@@ -2,7 +2,6 @@ package com.abin.mallchat.common.user.service.adapter;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.RandomUtil;
 import com.abin.mallchat.common.common.domain.enums.YesOrNoEnum;
 import com.abin.mallchat.common.user.domain.entity.ItemConfig;
 import com.abin.mallchat.common.user.domain.entity.User;
@@ -10,7 +9,7 @@ import com.abin.mallchat.common.user.domain.entity.UserBackpack;
 import com.abin.mallchat.common.user.domain.vo.response.user.BadgeResp;
 import com.abin.mallchat.common.user.domain.vo.response.user.UserInfoResp;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
+
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,17 +31,9 @@ public class UserAdapter {
         return user;
     }
 
-    public static User buildAuthorizeUser(Long id, WxOAuth2UserInfo userInfo) {
+    public static User buildAuthorizeUser(Long id) {
         User user = new User();
         user.setId(id);
-        user.setAvatar(userInfo.getHeadImgUrl());
-        user.setName(userInfo.getNickname());
-        user.setSex(userInfo.getSex());
-        if (userInfo.getNickname().length() > 6) {
-            user.setName("名字过长" + RandomUtil.randomInt(100000));
-        } else {
-            user.setName(userInfo.getNickname());
-        }
         return user;
     }
 
